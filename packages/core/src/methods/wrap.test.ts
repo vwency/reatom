@@ -1,11 +1,16 @@
-import { expect, getStackTrace, test } from 'test'
+import { expect, test } from 'test'
 
 import { atom, root } from '../core/atom'
 import { wrap } from './wrap'
 import { sleep } from '../utils'
+import { getStackTrace } from '../connectLogger'
 
 test('async frame stack', async () => {
   const name = 'asyncStack'
+  const getTrace = () =>
+    getStackTrace('', ' ')
+      .replaceAll(`${name}.`, '')
+      .replace(/ \[\#\d\]/g, '')
 
   const a0 = atom(0, `${name}.a0`)
   const a1 = atom(() => {
@@ -32,7 +37,7 @@ test('async frame stack', async () => {
 
       atom(() => {
         try {
-          logs.push(a0() + getStackTrace().replaceAll(`${name}.`, ''))
+          logs.push(a0() + getTrace())
         } catch (error) {
           reject(error)
         }
@@ -41,9 +46,9 @@ test('async frame stack', async () => {
   )
 
   expect(logs).toEqual([
-    '0 <-- log <-- a0',
-    '2 <-- log <-- a0 <-- loop <-- a2 <-- a1 <-- a0',
-    '4 <-- log <-- a0 <-- loop <-- a2 <-- a1 <-- a0 <-- loop <-- a2 <-- a1 <-- a0',
+    '0 <-- a0',
+    '2 <-- a0 <-- loop <-- a2 <-- a1 <-- a0',
+    '4 <-- a0 <-- loop <-- a2 <-- a1 <-- a0 <-- loop <-- a2 <-- a1 <-- a0',
   ])
 
   expect(root().pubs).toEqual([null])

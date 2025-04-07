@@ -82,7 +82,11 @@ export function assert(
 
 export const noop: (...params: any[]) => any = () => {}
 
-export const identity = <T>(value: T, ...a: any[]): T => value
+export const identity = <T>(
+  value: T,
+  // @ts-expect-error
+  ...a: any[]
+): T => value
 
 export const sleep = (ms = 0) => new Promise((r) => setTimeout(r, ms))
 
@@ -169,6 +173,7 @@ export const isDeepEqual = (a: any, b: any) => {
 
 export let defineName = <T extends Fn | Function>(
   target: T,
+  // @ts-expect-errord
   name: string,
 ): T => {
   // TODO Enable by a flag in devtools. This enables beautiful readable stacktraces, but lead to deopts with 1.5x the whole code slowdown
@@ -334,7 +339,7 @@ export const toAbortError = (reason: any): AbortError => {
       reason = isObject(reason) ? toString.call(reason) : String(reason)
     }
 
-    reason += ` [${++i}]`
+    reason += ` [#${++i}]`
 
     if (typeof DOMException === 'undefined') {
       reason = new Error(reason, options)
@@ -381,3 +386,6 @@ export const setTimeout: SetTimeout = Object.assign(
 
 /** @link https://developer.mozilla.org/en-US/docs/Web/API/setTimeout#maximum_delay_value */
 export const MAX_SAFE_TIMEOUT = 2 ** 31 - 1
+
+export const isBrowser = () =>
+  typeof window === 'object' && typeof document === 'object'
